@@ -5,4 +5,3 @@ class Product:
         self.Price = Price
         self.Quantity = Quantity
 
-    
