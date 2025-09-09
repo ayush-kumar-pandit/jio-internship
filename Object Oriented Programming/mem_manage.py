@@ -59,7 +59,7 @@ def test_mem_manage():
     print(f"Peak memory usage: {peak / 1024:.2f} KB")
     tracemalloc.stop()
     
-
+    print(tracemalloc.Snapshot.statistics(snap5,key_type = 'lineno'))
 
 
 
