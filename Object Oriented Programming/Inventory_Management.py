@@ -1,9 +1,13 @@
+import os
 import pandas as pd
 
 class Inventory_Management:
-    #To create a Dataframe file with columns as below
     def __init__(self):
-        self.inventory = pd.DataFrame(columns=['Product ID','Name','Price','Quantity'])
+        if os.path.exists('Inventory.csv'):
+            self.inventory = pd.read_csv('Inventory.csv')
+        else:
+            self.inventory = pd.DataFrame(columns=['Product ID', 'Name', 'Price', 'Quantity'])
+
 
     #To save the Dataframe as a CSV File
     def Save_to_CSV(self):
@@ -11,8 +15,15 @@ class Inventory_Management:
 
     #To add New products to the DataFrame/ CSV File
     def Add_Products(self,prod_dict):
-        self.new_prod = pd.DataFrame(prod_dict)
-        self.inventory = pd.concat([self.inventory,self.new_prod],axis = 0,ignore_index = False) 
+        new_prod = pd.DataFrame(prod_dict)
+
+        # Keep only rows with new (non-duplicate) Product IDs
+        new_prod = new_prod[~new_prod['Product ID'].isin(self.inventory['Product ID'])]
+
+        # Append only unique products
+        self.inventory = pd.concat([self.inventory, new_prod], ignore_index=True)
+
+            
 
 
     #To Remove a product from DataFrame/CSV file By Product ID
@@ -23,6 +34,18 @@ class Inventory_Management:
 
         self.inventory = self.inventory[self.inventory['Product ID'].values != prod]
     
+    #To Update a product details by ID
+    def update_prod(self,prod_dict):
+
+        prod_ID = prod_dict['Product ID']
+        if prod_ID not in self.inventory['Product ID'].values:
+            print(f"{prod_dict['Product ID']} not found in inventory!!")
+            return
+        
+        for key in ['Price', 'Quantity']:
+            if key in prod_dict:
+                self.inventory.loc[self.inventory['Product ID'] == prod_ID, key] = prod_dict[key]
+
 
     #To check if a product is available or not By product ID
     def is_available(self,prod):
@@ -59,4 +82,12 @@ if __name__ == '__main__':
     Obj1.Add_Products(products)
     Obj1.Save_to_CSV()
     print(Obj1) 
-    print(Obj1.is_available('P03'))
+    print(Obj1.is_available('P04'))
+
+    products = {'Product ID': 'P04',
+                'Price': 3500,
+                'Quantity': 234}
+    Obj1.update_prod(products)
+
+    Obj1.Save_to_CSV()
+    print(Obj1) 
