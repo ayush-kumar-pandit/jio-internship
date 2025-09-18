@@ -1,9 +1,26 @@
 import csv
+import logging
+
+
+
+def log(my_dict):
+    
+    logging.basicConfig(filename = 'app.log',
+                            level = logging.INFO,
+                            format = '%(asctime)s - %(levelname)s - %(message)s',
+                            filemode = 'a')
+    logging.info('Item added to list!!')
+    
+    if type(my_dict['ID']) != int or type(my_dict['Task']) != str or type(my_dict['Status']) != str:
+                logging.warning('Invalid input!!')
+        
 
 to_do_list = []
 def add_task(task,id):
     my_dict = {'ID': id,'Task': task,'Status' : 'Pending'}
     to_do_list.append(my_dict)
+    log(my_dict)
+    
     
 def list_task():
     for item in to_do_list:
@@ -17,7 +34,7 @@ def mark_as_done(id):
 
 
 def save_to_csv():
-    with open('To Do List.csv',"w",newline = '') as csvfile:
+    with open('To Do List.csv',"a",newline = '') as csvfile:
         writer = csv.DictWriter(csvfile,fieldnames = ['ID','Task', 'Status'])
         for row in to_do_list:
             writer.writerow(row)
