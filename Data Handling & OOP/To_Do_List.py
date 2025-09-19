@@ -1,4 +1,6 @@
 import csv
+import logging
+
 
 class task:
     def __init__(self,id,description):
@@ -14,8 +16,29 @@ class task_manager():
     def __init__(self,id,description):
         self.obj = [task(id,description)]
         
+
+
+    def log(task_manager):
+    
+        logging.basicConfig(filename = 'app.log',
+                            level = logging.INFO,
+                            format = '%(asctime)s - %(levelname)s - %(message)s',
+                            filemode = 'a')
+        logging.info('Item added to list!!')
+        for row in task_manager.obj:
+
+            if type(row.dic['ID']) != int or type(row.dic['Description']) != str or type(row.dic['Status']) != str:
+                logging.warning('Invalid input!!')
+
+
     def add_task(self,id,description):
+
+        for row in self.obj:
+            if row.dic['ID'] == id:
+                print("Task already exists in List")
+                return
         self.obj.append(task(id,description))
+        
 
     def update_status(self,id):
         for row in self.obj:
@@ -56,11 +79,14 @@ if __name__ == '__main__':
 
     TM.list_task()
 
+    TM.add_task(3,'Learn about Venv')
     TM.update_status(1)
     TM.update_status(2)
     TM.update_status(3)
     TM.save_to_csv()
     TM.load_from_csv()
-
+    
+    TM.log()
+   
 
         
