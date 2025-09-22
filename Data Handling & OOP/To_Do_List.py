@@ -66,6 +66,14 @@ class TaskManager:
             print("CSV file not found.")
             self.log("Attempted to load CSV but file not found.")
 
+    def get_summary(self):
+        data = [task.dic for task in self.obj]
+        df = pd.DataFrame(data)
+        print(f"Total number of tasks:{df['ID'].count()}")
+        print(f"Total number of completed tasks:{df[df.Status == 'Completed'].count().Status}")
+        print(f"Total number of pending tasks:{df[df.Status == 'Pending'].count().Status}")
+        
+
 
 if __name__ == '__main__':
     TM = TaskManager(1, 'Install python 3.10+')
@@ -84,3 +92,5 @@ if __name__ == '__main__':
 
     TM.save_to_csv()
     TM.load_from_csv()
+
+    TM.get_summary()
