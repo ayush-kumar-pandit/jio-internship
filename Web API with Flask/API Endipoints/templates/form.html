@@ -35,39 +35,48 @@
                                 Dropdown
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="#">Action</a></li>
-                                <li><a class="dropdown-item" href="#">Another action</a></li>
+                                <li><a class="dropdown-item" href="http://localhost:5000/update_form">Update Status</a></li>
+                                <li><a class="dropdown-item" href="http://localhost:5000/delete_task">Delete Task</a></li>
+                                <li><a class="dropdown-item" href="http://localhost:5000/summary">View Summary</a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
-                                <li><a class="dropdown-item" href="#">Something else here</a></li>
+                                <li><a class="dropdown-item" href="http://localhost:5000/delete">Delete List</a></li>
                             </ul>
                         </li>
-                        
+
                     </ul>
                     <form class="d-flex">
                         <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
                         <button class="btn btn-outline-success" type="submit">Search</button>
-                        <a href="http://localhost:5000/"></a>
                     </form>
                 </div>
             </div>
         </nav>
     </div>
-    <div class="container">
-        <form>
+
+    <div class="container mt-4">
+        <form method="POST" action="/tasks">
             <div class="mb-3">
                 <label for="task" class="form-label">Task</label>
-                <input type="text" class="form-control" id="task" aria-describedby="taskdetail" contenteditable="true">
-            </div>
-            <div class="mb-3">
-                <label for="stat" class="form-label">Status</label>
-                <input type="text" class="form-control" id="stat">
+                <input type="text" class="form-control" id="task" name="task" placeholder="Enter task" required>
             </div>
 
-            <button type="submit" class="btn btn-outline-dark">Submit</button>
+            <!-- Optional: Allow user to add status manually -->
+            <div class="mb-3">
+                <label for="status" class="form-label">Status</label>
+                <input type="text" class="form-control" id="status" name="status" placeholder="Pending/Done">
+            </div>
+
+            <div class="mb-3">
+                <button type="submit" class="btn btn-outline-dark">Submit</button>
+            </div>
         </form>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" 
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" 
+        crossorigin="anonymous"></script>
+
 </body>
 
 </html>
