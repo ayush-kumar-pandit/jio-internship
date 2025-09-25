@@ -82,6 +82,16 @@ def done(todo_id):
     conn.close()
     return redirect("/")
 
+@app.route('/delete_task')
+def del_task():
+    conn = sqlite3.connect("todo.db")
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM tasks WHERE status='Pending'")
+    tasks = cur.fetchall()
+    conn.close()
+    return render_template("delete_task.html", tasks=tasks)   
+
+
 # Delete task
 @app.route("/delete/<int:todo_id>")
 def delete(todo_id):
