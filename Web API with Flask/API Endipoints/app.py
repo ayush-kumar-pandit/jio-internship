@@ -26,9 +26,14 @@ def index():
         tasks = cursor.fetchall()
     return render_template("index.html", tasks=tasks)
 
-@app.route('/update_task')
-def mark_as_done():
-    return render_template('update.html')
+@app.route("/update_task")
+def update_form():
+    conn = sqlite3.connect("todo.db")
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM tasks WHERE status='Pending'")
+    tasks = cur.fetchall()
+    conn.close()
+    return render_template("update.html", tasks=tasks)
 
 @app.route("/summary")
 def summary():
