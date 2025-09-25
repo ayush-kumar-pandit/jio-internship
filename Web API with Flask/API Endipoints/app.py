@@ -35,7 +35,7 @@ def update_form():
     conn.close()
     return render_template("update.html", tasks=tasks)
 
-@app.route("/summary")
+@app.route("/tasks/summary")
 def summary():
     conn = sqlite3.connect("todo.db")
     cur = conn.cursor()
@@ -86,7 +86,7 @@ def done(todo_id):
 def del_task():
     conn = sqlite3.connect("todo.db")
     cur = conn.cursor()
-    cur.execute("SELECT * FROM tasks WHERE status='Pending'")
+    cur.execute("SELECT * FROM tasks")
     tasks = cur.fetchall()
     conn.close()
     return render_template("delete_task.html", tasks=tasks)   
