@@ -19,7 +19,14 @@ def display_usage(cpu_usage,mem_usage,disk_usage,bars = 50):
     print(f"Memory usage : |{mem_bar}| {mem_usage:.2f}%  ", end = '')
     print(f"Disk usage : |{disk_bar}| {disk_usage:.2f}%  ", end = '\r')
 
-    with open_csv()
+    my_dict = {'CPU' : cpu_usage,
+               'Memory' : mem_usage,
+               'Disk' : disk_usage}
+
+
+    with open('resource_usage.csv','a', newline = '') as csvfile:
+        writer = csv.DictWriter(csvfile,fieldnames = ['CPU','Memory','Disk'])
+        writer.writerow(my_dict)
 
 
     with open('policy.yaml','r') as f:
