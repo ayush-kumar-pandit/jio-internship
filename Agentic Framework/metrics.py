@@ -42,10 +42,11 @@ def display_usage(cpu_usage,mem_usage,disk_usage,bars = 50):
 
 
 
-while True:
+if __name__ == '__main__':
 
-    display_usage(psutil.cpu_percent(),psutil.virtual_memory().percent,psutil.disk_usage('C:/')[3],30)
-    time.sleep(0.5)
+    while True:
+        display_usage(psutil.cpu_percent(),psutil.virtual_memory().percent,psutil.disk_usage('C:/')[3],30)
+        time.sleep(5)
 
 
 
