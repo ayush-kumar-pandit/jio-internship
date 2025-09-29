@@ -33,13 +33,13 @@ def display_usage(cpu_usage,mem_usage,disk_usage,bars = 50):
         data = yaml.safe_load(f)
     if (data['cpu'] < cpu_usage):
         print("\nCPU usage exceeded!!")
-        exit()
+        
     elif (data['mem'] < mem_usage):
         print("\nMemory usage exceeded!!")
-        exit()
+        
     elif (data['disk'] < disk_usage):
         print("\nDisk usage exceeded!!")
-        exit()
+        
 
     
 
@@ -50,7 +50,7 @@ if __name__ == '__main__':
         count = 0
         while True:
             display_usage(psutil.cpu_percent(),psutil.virtual_memory().percent,psutil.disk_usage('C:/')[3],30)
-            time.sleep(1)
+            time.sleep(5)
             count += 1
             if count % 5 == 0:
                 x = input('\nDo yo want to stop Monitoring? (Y/N)')
