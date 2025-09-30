@@ -29,16 +29,19 @@ def index():
 # Select whether to start or stop collecting stats 
 @app.route('/tasks/action', methods = ['POST'])
 def action(act):
-    if act:
-        cpu_stat = psutil.cpu_percent()
-        mem_stat = psutil.virtual_memory().percent
-        disk_stat = psutil.disk_usage('/')
+    while True:
+        if act == 'Start':
+            cpu_stat = psutil.cpu_percent()
+            mem_stat = psutil.virtual_memory().percent
+            disk_stat = psutil.disk_usage('/')
 
-        conn = sqlite3.connect("sys_metrics.db", timeout = 10)  
-        cur = conn.cursor()
-        cur.execute("INSERT INTO metrics (cpu, memory, disk) VALUES (?, ?, ?)", (cpu_stat, mem_stat, disk_stat))
-        conn.commit()
-        conn.close()
+            conn = sqlite3.connect("sys_metrics.db", timeout = 10)  
+            cur = conn.cursor()
+            cur.execute("INSERT INTO metrics (cpu, memory, disk) VALUES (?, ?, ?)", (cpu_stat, mem_stat, disk_stat))
+            conn.commit()
+            conn.close()
+        else:
+            return redirect('/')
 
 
 
@@ -81,7 +84,7 @@ def status():
 
     with open('policy.yaml','r') as f:
         data = yaml.safe_load(f)
-    if (data['cpu'] > cpu_usage) and (data['mem'] < mem_usage) and (data['disk'] < disk_usage):
+    if (data['cpu'] > cpu_usage) and (data['mem'] > mem_usage) and (data['disk'] > disk_usage):
        return 200
 
 
