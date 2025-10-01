@@ -1,7 +1,6 @@
-from flask import Flask,redirect,jsonify,request
+from flask import Flask,redirect,jsonify
 import sqlite3
 import psutil
-import time
 import yaml
 
 
@@ -30,32 +29,36 @@ def index():
 
 
 # Select whether to start or stop collecting stats 
+from flask import request, redirect
 
 @app.route('/tasks/action', methods=['POST'])
 def action():
     if request.form.get('action') == 'Start':
         cpu_stat = psutil.cpu_percent()
         mem_stat = psutil.virtual_memory().percent
-        disk_stat = psutil.disk_usage('/').percent  # Don't forget to get `.percent`
+        disk_stat = psutil.disk_usage('/').percent  
 
         conn = sqlite3.connect("sys_metrics.db", timeout=10)
         cur = conn.cursor()
         cur.execute("INSERT INTO metrics (cpu, memory, disk) VALUES (?, ?, ?)", (cpu_stat, mem_stat, disk_stat))
         conn.commit()
         conn.close()
-        return "Metrics recorded"  # Or render a template or JSON response
+        return "Metrics recorded"  
     else:
         return redirect('/')
+
+
 
 
 
 # Show live stats
 @app.route('/metrics/data')
 def live_stats():
-        stat = {'cpu' : psutil.cpu_percent(),
-                'memory' : psutil.virtual_memory().percent,
-                'disk' : psutil.disk_usage('/').percent}
-        return jsonify(stat)
+    
+    stat = {'cpu' : psutil.cpu_percent(),
+            'memory' : psutil.virtual_memory().percent,
+            'disk' : psutil.disk_usage('/')[3]}
+    return jsonify(stat)
 
 
 # Show stats previously stored in database
@@ -91,7 +94,7 @@ def status():
 
     cpu, mem, disk = row
 
-    if (cpu < data['cpu']) and (mem < data['mem']) and (disk < data['disk']):
+    if (cpu < data['cpu']) and (mem < data['memory']) and (disk < data['disk']):
         return jsonify({'status': 'healthy'}), 200
     else:
         return jsonify({'status': 'breached'}), 500
