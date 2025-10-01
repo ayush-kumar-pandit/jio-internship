@@ -2,9 +2,15 @@ from flask import Flask,redirect,jsonify,request
 import sqlite3
 import psutil
 import yaml
+import time
+from threading import Thread
 
 
 app = Flask(__name__)
+is_collecting = False
+collector_thread = None
+
+# Global flags
 
 # Initialize DB
 def init_db():
@@ -31,20 +37,46 @@ def index():
 # Select whether to start or stop collecting stats 
 @app.route('/tasks/action', methods=['POST'])
 def action():
-    if request.form.get('action') == 'Start':
-        cpu_stat = psutil.cpu_percent()
-        mem_stat = psutil.virtual_memory().percent
-        disk_stat = psutil.disk_usage('/').percent  # Don't forget to get `.percent`
+    global is_collecting, collector_thread
 
-        conn = sqlite3.connect("sys_metrics.db", timeout=10)
+    action = request.get_json('action')
+
+    if action['action'] == 'start':
+        if is_collecting:
+            return jsonify({"message": "Already collecting"}), 200
+        else:
+            is_collecting = True
+            collector_thread = Thread(target=background_collector, daemon=True)
+            collector_thread.start()
+            return jsonify({"message": "Started collecting system metrics"}), 200
+
+    elif action['action'] == 'stop':
+        if is_collecting:
+            is_collecting = False
+            return jsonify({"message": "Stopped collecting system metrics"}), 200
+        else:
+            return jsonify({"message": "Collection was not running"}), 200
+        
+    else:
+        return jsonify({"message": "Something went wrong!!"}), 200
+
+
+
+# Collects data in every 5 seconds
+def background_collector():
+    global is_collecting
+    while is_collecting:
+        cpu = psutil.cpu_percent()
+        mem = psutil.virtual_memory().percent
+        disk = psutil.disk_usage('/').percent
+
+        conn = sqlite3.connect('sys_metrics.db', timeout=10)
         cur = conn.cursor()
-        cur.execute("INSERT INTO metrics (cpu, memory, disk) VALUES (?, ?, ?)", (cpu_stat, mem_stat, disk_stat))
+        cur.execute("INSERT INTO metrics (cpu, memory, disk) VALUES (?, ?, ?)", (cpu, mem, disk))
         conn.commit()
         conn.close()
-        return "Metrics recorded"  # Or render a template or JSON response
-    else:
-        return redirect('/')
 
+        time.sleep(5)
 
 
 
@@ -73,23 +105,28 @@ def recent_stats():
 # Returns status whether resource usage is breached or not
 @app.route('/health')
 def status():
-    conn  = sqlite3.connect('sys_metrics.db', timeout = 10)
+    try:
+        with open('policy.yaml', 'r') as f:
+            data = yaml.safe_load(f)
+    except Exception as e:
+        return jsonify({'error': f'Failed to load policy.yaml: {str(e)}'}), 500
+
+    conn = sqlite3.connect('sys_metrics.db', timeout=10)
     cur = conn.cursor()
 
-    cur.execute("SELECT cpu FROM metrics")
-    cpu_usage = cur.fetchall()
+    cur.execute("SELECT cpu, memory, disk FROM metrics ORDER BY rowid DESC LIMIT 1")
+    row = cur.fetchone()
+    conn.close()
 
-    cur.execute("SELECT memory FROM metrics")
-    mem_usage = cur.fetchall()
-    
-    cur.execute("SELECT disk FROM metrics")
-    disk_usage = cur.fetchall()
+    if row is None:
+        return jsonify({'error': 'No metrics data found'}), 404
 
+    cpu, mem, disk = row
 
-    with open('policy.yaml','r') as f:
-        data = yaml.safe_load(f)
-    if (data['cpu'] > cpu_usage) and (data['mem'] > mem_usage) and (data['disk'] > disk_usage):
-       return 200
+    if (cpu < data['cpu']) and (mem < data['memory']) and (disk < data['disk']):
+        return jsonify({'status': 'healthy'}), 200
+    else:
+        return jsonify({'status': 'breached'}), 500
 
 
 if __name__ == '__main__':
