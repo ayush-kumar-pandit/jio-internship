@@ -11,12 +11,14 @@ def init_db():
     conn = sqlite3.connect("sys_metrics.db")
     cur = conn.cursor()
     cur.execute("""
-        CREATE TABLE IF NOT EXISTS metrics (
-            cpu FLOAT,
-            memory FLOAT,
-            disk FLOAT'
-        )
-    """)
+                CREATE TABLE IF NOT EXISTS metrics (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    cpu FLOAT,
+                    memory FLOAT,
+                    disk FLOAT,
+                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+                )
+                """)
     conn.commit()
     conn.close()
 
@@ -27,30 +29,34 @@ def index():
 
 
 # Select whether to start or stop collecting stats 
-@app.route('/tasks/action', methods = ['POST'])
-def action(act):
-    while True:
-        if act == 'Start':
-            cpu_stat = psutil.cpu_percent()
-            mem_stat = psutil.virtual_memory().percent
-            disk_stat = psutil.disk_usage('/')
+from flask import request, redirect
 
-            conn = sqlite3.connect("sys_metrics.db", timeout = 10)  
-            cur = conn.cursor()
-            cur.execute("INSERT INTO metrics (cpu, memory, disk) VALUES (?, ?, ?)", (cpu_stat, mem_stat, disk_stat))
-            conn.commit()
-            conn.close()
-        else:
-            return redirect('/')
+@app.route('/tasks/action', methods=['POST'])
+def action():
+    if request.form.get('action') == 'Start':
+        cpu_stat = psutil.cpu_percent()
+        mem_stat = psutil.virtual_memory().percent
+        disk_stat = psutil.disk_usage('/').percent  # Don't forget to get `.percent`
+
+        conn = sqlite3.connect("sys_metrics.db", timeout=10)
+        cur = conn.cursor()
+        cur.execute("INSERT INTO metrics (cpu, memory, disk) VALUES (?, ?, ?)", (cpu_stat, mem_stat, disk_stat))
+        conn.commit()
+        conn.close()
+        return "Metrics recorded"  # Or render a template or JSON response
+    else:
+        return redirect('/')
+
 
 
 
 # Show live stats
 @app.route('/metrics/data')
 def live_stats():
+    
     stat = {'cpu' : psutil.cpu_percent(),
             'memory' : psutil.virtual_memory().percent,
-            'disk' : psutil.disk_usage('/')}
+            'disk' : psutil.disk_usage('/')[3]}
     return jsonify(stat)
 
 
@@ -64,7 +70,7 @@ def recent_stats():
     stat = cur.fetchall()
     conn.close()
 
-    return stat
+    return jsonify(stat)
 
 # Returns status whether resource usage is breached or not
 @app.route('/health')
@@ -89,4 +95,5 @@ def status():
 
 
 if __name__ == '__main__':
+    init_db()
     app.run(debug = True)
