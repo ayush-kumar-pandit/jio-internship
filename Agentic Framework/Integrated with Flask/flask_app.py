@@ -83,8 +83,6 @@ def background_collector():
 # Show live stats
 @app.route('/metrics/data')
 def live_stats():
-    # stats_thread = Thread(target = cont_stats, daemon=True)
-    # stats_thread.start()
     stat = {'cpu' : psutil.cpu_percent(),
             'memory' : psutil.virtual_memory().percent,
             'disk' : psutil.disk_usage('/').percent}
