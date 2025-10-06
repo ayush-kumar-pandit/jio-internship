@@ -83,8 +83,8 @@ def background_collector():
 # Show live stats
 @app.route('/metrics/data')
 def live_stats():
-    stats_thread = Thread(target = cont_stats, daemon=True)
-    stats_thread.start()
+    # stats_thread = Thread(target = cont_stats, daemon=True)
+    # stats_thread.start()
     stat = {'cpu' : psutil.cpu_percent(),
             'memory' : psutil.virtual_memory().percent,
             'disk' : psutil.disk_usage('/').percent}
@@ -104,24 +104,7 @@ def live_stats():
     return jsonify(stat)
 
 
-def cont_stats():
-    stat = {'cpu' : psutil.cpu_percent(),
-            'memory' : psutil.virtual_memory().percent,
-            'disk' : psutil.disk_usage('/').percent}
-    
-    try:
-        with open('policy.yaml', 'r') as f:
-            data = yaml.safe_load(f)
-    except Exception as e:
-        return jsonify({'error': f'Failed to load policy.yaml: {str(e)}'}), 500
-    
-    if (stat['cpu'] < data['cpu']) and (stat['memory'] < data['memory']) and (stat['disk'] < data['disk']):
-        stat['status'] = 'healthy'
-    else:
-        stat['status'] = 'breached'
 
-    
-    return jsonify(stat)
 
 
 # Show stats previously stored in database
