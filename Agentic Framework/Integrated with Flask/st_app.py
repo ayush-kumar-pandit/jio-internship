@@ -1,5 +1,8 @@
 import streamlit as st
+import requests
+
+
 
 st.header('Dashboard')
-name = st.text_input('Enter Your Name:')
-st.text(f"Good evening, {name}")
+Data = requests.get('http://127.0.0.1:5000/')
+st.form(Data)

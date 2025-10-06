@@ -94,13 +94,16 @@ def live_stats():
 @app.route('/metrics/dump')
 def recent_stats():
     conn  = sqlite3.connect('sys_metrics.db', timeout = 10)
+    conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
     cur.execute("SELECT * FROM metrics")
-    stat = cur.fetchall()
+    rows = cur.fetchall()
     conn.close()
-
-    return jsonify(stat)
+    
+    stats = [dict(row) for row in rows]
+    
+    return jsonify(stats)
 
 # Returns status whether resource usage is breached or not
 @app.route('/health')
