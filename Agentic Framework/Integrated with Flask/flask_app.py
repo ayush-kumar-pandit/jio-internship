@@ -83,7 +83,7 @@ def background_collector():
 # Show live stats
 @app.route('/metrics/data')
 def live_stats():
-    
+
     stat = {'cpu' : psutil.cpu_percent(),
             'memory' : psutil.virtual_memory().percent,
             'disk' : psutil.disk_usage('/').percent}
@@ -134,4 +134,4 @@ def status():
 
 if __name__ == '__main__':
     init_db()
-    app.run(debug = True)
+    app.run(debug = True, threaded = True)
