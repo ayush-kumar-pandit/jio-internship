@@ -22,7 +22,8 @@ def init_db():
                     cpu FLOAT,
                     memory FLOAT,
                     disk FLOAT,
-                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    status TEXT
                 )
                 """)
     conn.commit()
@@ -69,10 +70,22 @@ def background_collector():
         cpu = psutil.cpu_percent()
         mem = psutil.virtual_memory().percent
         disk = psutil.disk_usage('/').percent
+        try:
+            with open('policy.yaml', 'r') as f:
+                data = yaml.safe_load(f)
+        except Exception as e:
+            return jsonify({'error': f'Failed to load policy.yaml: {str(e)}'}), 500
+        
+        if (cpu < data['cpu']) and (mem < data['memory']) and (disk < data['disk']):
+            status = 'healthy'
+        else:
+            status = 'breached'
+
+
 
         conn = sqlite3.connect('sys_metrics.db', timeout=10)
         cur = conn.cursor()
-        cur.execute("INSERT INTO metrics (cpu, memory, disk) VALUES (?, ?, ?)", (cpu, mem, disk))
+        cur.execute("INSERT INTO metrics (cpu, memory, disk, status) VALUES (?, ?, ?, ?)", (cpu, mem, disk, status))
         conn.commit()
         conn.close()
 
