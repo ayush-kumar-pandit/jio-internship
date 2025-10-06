@@ -17,10 +17,18 @@ action = 'http://127.0.0.1:5000/tasks/action'
 
 response = requests.get(cur_metrics)  
 data = response.json()
-# st.write("CPU:", data["cpu"])
-# st.write("Memory:", data["memory"])
-# st.write("Disk:", data["disk"])
-st.dataframe(data)
+
+
+a, b = st.columns(2)
+c, d = st.columns(2)
+
+a.metric("CPU usage", data["cpu"], border=True)
+b.metric("Memory usage", data["memory"], border=True)
+
+c.metric("Disk usage", data["disk"], border=True)
+d.metric("Status", data["status"], border=True)
+
+
 
 
 if st.button("Get old Stats"):
