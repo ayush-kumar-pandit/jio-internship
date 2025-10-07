@@ -6,7 +6,6 @@ import time
 
 st_autorefresh(interval = 2000, key = 'auto_refresh')
 
-
 st.header('Dashboard')
 
 dump_metrics = 'http://127.0.0.1:5000/metrics/dump'
@@ -18,31 +17,36 @@ health = 'http://127.0.0.1:5000/health'
 action = 'http://127.0.0.1:5000/tasks/action'
 
 
-response = requests.get(cur_metrics)  
-data = response.json()
-
-a, b = st.columns(2)
-c, d = st.columns(2)
-
-a.metric("CPU usage", data["cpu"], border=True)
-b.metric("Memory usage", data["memory"], border=True)
-
-c.metric("Disk usage", data["disk"], border=True)
-d.metric("Status", data["status"], border=True)
 
 
 
+with st.container():
+    left, right = st.columns(2)
 
-if st.button("Get old Stats"):
+    response = requests.get(cur_metrics)  
+    data = response.json()
+
+
+    a, b = left.columns(2)
+    c, d = left.columns(2)
+
+    a.metric("CPU usage", data["cpu"], border=True)
+    b.metric("Memory usage", data["memory"], border=True)
+
+    c.metric("Disk usage", data["disk"], border=True)
+    d.metric("Status", data["status"], border=True)
+
+
+
     try:
         dump_response = requests.get(dump_metrics, timeout = 10)
         if dump_response.status_code == 200:
             data = dump_response.json()
 
             df = pd.DataFrame(data)
-            st.subheader('From DB')
-            st.success('Data fetched successfully')
-            st.dataframe(df)
+            right.subheader('From DB')
+            right.success('Data fetched successfully')
+            right.dataframe(df)
 
         else:
             st.error("Failed to get data.")
