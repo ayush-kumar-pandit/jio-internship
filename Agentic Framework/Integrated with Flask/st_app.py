@@ -6,7 +6,6 @@ import time
 
 st_autorefresh(interval = 2000, key = 'auto_refresh')
 
-st.header('Dashboard')
 
 dump_metrics = 'http://127.0.0.1:5000/metrics/dump'
 
@@ -19,9 +18,13 @@ action = 'http://127.0.0.1:5000/tasks/action'
 
 
 
+buttons = st.container(horizontal=True, horizontal_alignment="right")
+buttons.header('Dashboard')
+buttons.button('Start')
+buttons.button('Stop')
 
 with st.container():
-    left, right = st.columns(2)
+    left, right = st.columns(2,vertical_alignment = 'center')
 
     response = requests.get(cur_metrics)  
     data = response.json()
@@ -44,9 +47,9 @@ with st.container():
             data = dump_response.json()
 
             df = pd.DataFrame(data)
-            right.subheader('From DB')
+            right.subheader('Previous Stats')
             right.success('Data fetched successfully')
-            right.dataframe(df)
+            right.dataframe(df,hide_index = True)
 
         else:
             st.error("Failed to get data.")
