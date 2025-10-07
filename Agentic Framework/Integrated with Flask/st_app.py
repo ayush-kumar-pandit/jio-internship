@@ -21,11 +21,11 @@ action = 'http://127.0.0.1:5000/tasks/action'
 buttons = st.container(horizontal=True, horizontal_alignment="right")
 buttons.header('Dashboard')
 if buttons.button('Start'):
-    requests.post(url = action,data = {'action' : 'start'})
+    requests.post(url = action,json = {'action' : 'start'})
     buttons.success('Collector started collecting data!!')
     
 if buttons.button('Stop'):
-    requests.post(url = action,data = {'action' : 'stop'})
+    requests.post(url = action,json = {'action' : 'stop'})
     buttons.success('Collector stoped collecting data!!')
 
 
