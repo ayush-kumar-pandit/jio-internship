@@ -1,7 +1,10 @@
 import streamlit as st
 import requests
 import pandas as pd
+from streamlit_autorefresh import st_autorefresh
+import time
 
+st_autorefresh(interval = 2000, key = 'auto_refresh')
 
 
 st.header('Dashboard')
@@ -17,7 +20,6 @@ action = 'http://127.0.0.1:5000/tasks/action'
 
 response = requests.get(cur_metrics)  
 data = response.json()
-
 
 a, b = st.columns(2)
 c, d = st.columns(2)
@@ -39,7 +41,9 @@ if st.button("Get old Stats"):
 
             df = pd.DataFrame(data)
             st.subheader('From DB')
+            st.success('Data fetched successfully')
             st.dataframe(df)
+
         else:
             st.error("Failed to get data.")
     except Exception as e:
