@@ -20,11 +20,18 @@ action = 'http://127.0.0.1:5000/tasks/action'
 
 buttons = st.container(horizontal=True, horizontal_alignment="right")
 buttons.header('Dashboard')
-buttons.button('Start')
-buttons.button('Stop')
+if buttons.button('Start'):
+    requests.post(url = action,data = {'action' : 'start'})
+    buttons.success('Collector started collecting data!!')
+    
+if buttons.button('Stop'):
+    requests.post(url = action,data = {'action' : 'stop'})
+    buttons.success('Collector stoped collecting data!!')
+
+
 
 with st.container():
-    left, right = st.columns(2,vertical_alignment = 'center')
+    left, right = st.columns(2,vertical_alignment = 'top')
 
     response = requests.get(cur_metrics)  
     data = response.json()
@@ -48,7 +55,6 @@ with st.container():
 
             df = pd.DataFrame(data)
             right.subheader('Previous Stats')
-            right.success('Data fetched successfully')
             right.dataframe(df,hide_index = True)
 
         else:
